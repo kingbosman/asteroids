@@ -4,12 +4,14 @@ from asteroidfield import AsteroidField
 from constants import *
 from player import Player
 from shot import Shot
+import os
 
 
 def main():
-    # print("Starting Asteroids!")
-    # print(f"Screen width: {SCREEN_WIDTH}")
-    # print(f"Screen height: {SCREEN_HEIGHT}")
+    if not os.path.exists("current_highscore.txt"):
+        with open("current_highscore.txt", "w") as file:
+            file.write("0")
+
     pygame.init()
     clock = pygame.time.Clock()
     dt = 0
@@ -40,14 +42,32 @@ def main():
         for v in asteroids:
             if player.collide(v):
                 print("Game over!")
+                print(f"final score: {player.score}")
+                with open("current_highscore.txt", "r+") as file:
+                    current = file.read()
+                    if player.score <= int(current):
+                        print(f"current highscore: {current}")
+                    else:
+                        file.seek(0)
+                        file.write(str(player.score))
+                        file.truncate()
+                        print("You have a new Highscore!")
                 exit()
 
             for shot in shots:
                 if shot.collide(v):
+                    player.score += 1
                     v.split()
                     shot.kill()
 
         screen.fill("black")
+
+        # Set score
+        font = pygame.font.Font("freesansbold.ttf", 32)
+        text = font.render(f"Score:{player.score}", True, (0, 255, 0))
+        screen.blit(text, pygame.Vector2(0, 0))
+
+        pygame.display.set_caption("Asteroid Game")
 
         # player.draw(screen)
         for v in drawable:
